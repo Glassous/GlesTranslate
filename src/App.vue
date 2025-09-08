@@ -1,8 +1,8 @@
 <template>
-  <div class="min-h-screen p-6 backdrop-filter backdrop-blur-lg bg-opacity-30 bg-gray-100">
+  <div class="min-h-screen p-6 backdrop-filter backdrop-blur-lg bg-opacity-30 bg-base-100">
     <!-- 标题 -->
     <div class="text-left mb-8">
-      <h1 class="text-5xl font-aladin font-bold bg-gradient-to-r from-purple-600 to-purple-900 bg-clip-text text-transparent">
+      <h1 class="text-5xl font-aladin font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
         GlesTranslate
       </h1>
     </div>
