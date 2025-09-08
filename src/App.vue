@@ -108,7 +108,13 @@
       </div>
 
       <!-- 翻译按钮 -->
-    <div class="text-center mt-6">
+    <div class="text-center mt-6 flex justify-center space-x-4">
+      <button 
+        @click="clearTexts"
+        class="btn btn-secondary btn-lg"
+      >
+        清空
+      </button>
       <button 
         @click="translateText"
         :disabled="!sourceText.trim() || isTranslating"
@@ -299,6 +305,12 @@ const translateText = async () => {
   } finally {
     isTranslating.value = false
   }
+}
+
+// 清空文本框
+const clearTexts = () => {
+  sourceText.value = ''
+  translatedText.value = ''
 }
 
 // 复制到剪贴板
