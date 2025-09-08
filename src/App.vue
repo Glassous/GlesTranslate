@@ -1,5 +1,5 @@
 <template>
-  <div class="min-h-screen p-6">
+  <div class="min-h-screen p-6 backdrop-filter backdrop-blur-lg bg-opacity-30 bg-gray-100">
     <!-- 标题 -->
     <div class="text-left mb-8">
       <h1 class="text-5xl font-aladin font-bold bg-gradient-to-r from-purple-600 to-purple-900 bg-clip-text text-transparent">
@@ -159,8 +159,12 @@
     </div>
 
     <!-- 历史记录详情模态框 -->
-    <div class="modal" :class="{ 'modal-open': showDetailModal }">
-      <div class="modal-box max-w-4xl">
+    <div v-if="showDetailModal" class="fixed inset-0 z-50 flex items-center justify-center">
+      <!-- 背景遮罩层 -->
+      <div class="fixed inset-0 backdrop-blur-sm" @click="closeDetailModal"></div>
+      
+      <!-- 模态框内容 -->
+      <div class="bg-base-100 rounded-lg shadow-xl max-w-4xl relative z-10 m-4 p-6">
         <h3 class="font-bold text-lg mb-4">翻译详情</h3>
         <div v-if="selectedRecord" class="space-y-4">
           <div class="text-sm text-gray-500">

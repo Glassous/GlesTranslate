@@ -9,12 +9,31 @@ export default {
       fontFamily: {
         'aladin': ['Aladin', 'cursive'],
       },
+      backdropFilter: {
+        'none': 'none',
+        'blur': 'blur(50px)',
+      },
+    },
+  },
+  variants: {
+    extend: {
+      backdropFilter: ['responsive'],
     },
   },
   plugins: [
     require('daisyui'),
+    require('@tailwindcss/forms'),
+    require('@tailwindcss/typography'),
+    require('tailwindcss-filters'),
   ],
   daisyui: {
+    styled: true,
+    base: true,
+    utils: true,
+    logs: true,
+    rtl: false,
+    prefix: "",
+    darkTheme: "dark",
     themes: ["light", "dark"],
   },
 }
