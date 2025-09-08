@@ -1,14 +1,22 @@
 <template>
-  <div class="min-h-screen p-6 backdrop-filter backdrop-blur-lg bg-opacity-30 bg-base-100">
+  <div class="min-h-screen p-6 backdrop-filter backdrop-blur-lg bg-opacity-30 bg-base-100 relative">
     <!-- 标题 -->
-    <div class="text-left mb-8">
+    <div class="flex items-center mb-8">
+      <button 
+        @click="historyExpanded = !historyExpanded"
+        class="btn btn-ghost btn-circle mr-4"
+      >
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+        </svg>
+      </button>
       <h1 class="text-5xl font-aladin font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
         GlesTranslate
       </h1>
     </div>
 
     <!-- 翻译模块 -->
-    <div class="w-full mx-auto">
+    <div class="w-full mx-auto transition-all duration-300 ease-in-out">
       <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <!-- 左侧：目标文本框 -->
         <div class="card bg-base-100 shadow-xl">
@@ -100,121 +108,73 @@
       </div>
 
       <!-- 翻译按钮 -->
-      <div class="text-center mt-6">
-        <button 
-          @click="translateText"
-          :disabled="!sourceText.trim() || isTranslating"
-          class="btn btn-primary btn-lg"
-        >
-          <span v-if="isTranslating" class="loading loading-spinner loading-sm"></span>
-          {{ isTranslating ? '翻译中...' : '翻译' }}
-        </button>
-      </div>
+    <div class="text-center mt-6">
+      <button 
+        @click="translateText"
+        :disabled="!sourceText.trim() || isTranslating"
+        class="btn btn-primary btn-lg"
+      >
+        <span v-if="isTranslating" class="loading loading-spinner loading-sm"></span>
+        {{ isTranslating ? '翻译中...' : '翻译' }}
+      </button>
+    </div>
 
-      <!-- 历史记录 -->
-      <div class="mt-8">
-        <div class="collapse collapse-arrow bg-base-200">
-          <input type="checkbox" v-model="historyExpanded" /> 
-          <div class="collapse-title text-xl font-medium">
-            翻译历史记录 ({{ translationHistory.length }})
-          </div>
-          <div class="collapse-content">
-            <div v-if="translationHistory.length === 0" class="text-center text-gray-500 py-4">
-              暂无翻译记录
-            </div>
-            <div v-else class="space-y-2">
-              <div 
-                v-for="(record, index) in translationHistory" 
-                :key="record.id"
-                class="card bg-base-100 shadow-sm hover:shadow-md transition-shadow cursor-pointer"
-              >
-                <div class="card-body p-4">
-                  <div class="flex justify-between items-start">
-                    <div class="flex-1" @click="showHistoryDetail(record)">
-                      <div class="text-sm text-gray-500 mb-1">
-                        {{ record.timestamp }} | {{ record.targetLanguage }}
-                      </div>
-                      <div class="text-sm truncate">
-                        <span class="font-medium">源文本：</span>{{ record.sourceText }}
-                      </div>
-                      <div class="text-sm truncate mt-1">
-                        <span class="font-medium">翻译：</span>{{ record.translatedText }}
-                      </div>
+      <!-- 历史记录侧边栏 -->
+    <div class="fixed top-0 left-0 h-full z-50 transition-all duration-300 ease-in-out"
+         :class="historyExpanded ? 'translate-x-0' : '-translate-x-full'">
+      <div class="bg-base-100 w-80 h-full flex flex-col shadow-lg">
+        <div class="p-4 border-b border-base-300">
+          <h2 class="text-xl font-bold">翻译历史记录 ({{ translationHistory.length }})</h2>
+        </div>
+        <div v-if="translationHistory.length === 0" class="flex-1 flex items-center justify-center text-gray-500">
+          暂无翻译记录
+        </div>
+        <div v-else class="flex-1 overflow-y-auto p-4">
+          <div class="space-y-4">
+            <div 
+              v-for="(record, index) in translationHistory" 
+              :key="record.id"
+              class="card bg-base-100 shadow-sm hover:shadow-md transition-shadow cursor-pointer h-32 flex flex-col"
+            >
+              <div class="card-body p-4 flex-1 overflow-hidden">
+                <div class="flex justify-between items-start h-full">
+                  <div class="flex-1 min-w-0" @click="fillFromHistory(record)">
+                    <div class="text-sm text-gray-500 mb-1 truncate">
+                      {{ record.timestamp }} | {{ record.targetLanguage }}
                     </div>
-                    <button 
-                      @click.stop="deleteHistoryRecord(index)"
-                      class="btn btn-ghost btn-sm btn-circle ml-2"
-                    >
-                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                      </svg>
-                    </button>
+                    <div class="text-sm truncate mb-1">
+                      <span class="font-medium">源文本：</span>{{ record.sourceText }}
+                    </div>
+                    <div class="text-sm truncate">
+                      <span class="font-medium">翻译：</span>{{ record.translatedText }}
+                    </div>
                   </div>
+                  <button 
+                    @click.stop="deleteHistoryRecord(index)"
+                    class="btn btn-ghost btn-sm btn-circle ml-2 flex-shrink-0"
+                  >
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                  </button>
                 </div>
               </div>
             </div>
           </div>
         </div>
+        <div class="p-4 border-t border-base-300">
+          <button @click="historyExpanded = false" class="btn btn-primary w-full">关闭</button>
+        </div>
       </div>
+    </div>
+    <!-- 侧边栏遮罩 -->
+    <div v-if="historyExpanded" 
+         class="fixed inset-0 bg-black bg-opacity-50 z-40"
+         @click="historyExpanded = false">
+    </div>
     </div>
 
-    <!-- 历史记录详情模态框 -->
-    <div v-if="showDetailModal" class="fixed inset-0 z-50 flex items-center justify-center">
-      <!-- 背景遮罩层 -->
-      <div class="fixed inset-0 backdrop-blur-sm" @click="closeDetailModal"></div>
-      
-      <!-- 模态框内容 -->
-      <div class="bg-base-100 rounded-lg shadow-xl max-w-4xl relative z-10 m-4 p-6">
-        <h3 class="font-bold text-lg mb-4">翻译详情</h3>
-        <div v-if="selectedRecord" class="space-y-4">
-          <div class="text-sm text-gray-500">
-            {{ selectedRecord.timestamp }} | {{ selectedRecord.targetLanguage }}
-          </div>
-          
-          <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
-            <div class="card bg-base-200">
-              <div class="card-body">
-                <div class="flex justify-between items-center mb-2">
-                  <h4 class="card-title text-base">源文本</h4>
-                  <button 
-                    @click="copyText(selectedRecord.sourceText)"
-                    class="btn btn-ghost btn-sm"
-                  >
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
-                    </svg>
-                    复制
-                  </button>
-                </div>
-                <p class="whitespace-pre-wrap">{{ selectedRecord.sourceText }}</p>
-              </div>
-            </div>
-            
-            <div class="card bg-base-200">
-              <div class="card-body">
-                <div class="flex justify-between items-center mb-2">
-                  <h4 class="card-title text-base">翻译结果</h4>
-                  <button 
-                    @click="copyText(selectedRecord.translatedText)"
-                    class="btn btn-ghost btn-sm"
-                  >
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
-                    </svg>
-                    复制
-                  </button>
-                </div>
-                <p class="whitespace-pre-wrap">{{ selectedRecord.translatedText }}</p>
-              </div>
-            </div>
-          </div>
-        </div>
-        
-        <div class="modal-action">
-          <button @click="closeDetailModal" class="btn">关闭</button>
-        </div>
-      </div>
-    </div>
+
   </div>
 </template>
 
@@ -247,8 +207,6 @@ const translatedText = ref('')
 const isTranslating = ref(false)
 const customLanguage = ref('')
 const historyExpanded = ref(false)
-const showDetailModal = ref(false)
-const selectedRecord = ref(null)
 const translationHistory = ref(loadFromStorage('translationHistory', []))
 const customLanguages = ref(loadFromStorage('customLanguages', []))
 
@@ -402,16 +360,18 @@ const deleteHistoryRecord = (index) => {
   saveToStorage('translationHistory', translationHistory.value)
 }
 
-// 显示历史记录详情
-const showHistoryDetail = (record) => {
-  selectedRecord.value = record
-  showDetailModal.value = true
-}
-
-// 关闭详情模态框
-const closeDetailModal = () => {
-  showDetailModal.value = false
-  selectedRecord.value = null
+// 从历史记录填充
+const fillFromHistory = (record) => {
+  sourceText.value = record.sourceText
+  // 查找并设置目标语言
+  const lang = languages.find(l => l.name === record.targetLanguage)
+  if (lang) {
+    selectedLanguage.value = lang
+  }
+  // 不自动触发翻译，只填充内容
+  translatedText.value = record.translatedText
+  // 关闭侧边栏
+  historyExpanded.value = false
 }
 
 // 组件挂载时的初始化
