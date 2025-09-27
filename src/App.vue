@@ -25,34 +25,27 @@
               <h2 class="card-title text-lg">源语言</h2>
               <div class="badge badge-primary">自动检测</div>
             </div>
-            <div class="relative">
-              <textarea 
-                v-model="sourceText"
-                class="textarea textarea-bordered w-full h-48 resize-none"
-                placeholder="请输入要翻译的文本..."
-                @input="handleInput"
-              ></textarea>
+            <textarea 
+              v-model="sourceText"
+              class="textarea textarea-bordered w-full h-48 resize-none"
+              placeholder="请输入要翻译的文本..."
+              @input="handleInput"
+            ></textarea>
+            <div class="flex justify-between items-center mt-2">
+              <div class="text-sm text-gray-500">
+                {{ sourceText.length }} / 5000 字符
+              </div>
               <!-- OCR按钮 -->
               <button 
                 @click="openOCRUpload"
-                class="absolute bottom-2 right-2 btn btn-sm btn-primary btn-circle"
+                class="btn btn-sm btn-primary"
                 title="OCR文字识别"
               >
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
                 </svg>
               </button>
-              <!-- 隐藏的文件输入 -->
-              <input 
-                ref="fileInput"
-                type="file"
-                accept="image/*"
-                @change="handleFileUpload"
-                class="hidden"
-              />
-            </div>
-            <div class="text-sm text-gray-500 mt-2">
-              {{ sourceText.length }} / 5000 字符
+
             </div>
           </div>
         </div>
@@ -200,6 +193,64 @@
     </div>
     </div>
 
+
+    <!-- OCR上传弹窗 -->
+    <div v-if="showOCRUploadModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
+      <div class="bg-base-100 rounded-lg p-6 max-w-lg w-full mx-4">
+        <div class="flex justify-between items-center mb-4">
+          <h3 class="text-xl font-bold">OCR文字识别</h3>
+          <button @click="closeOCRUploadModal" class="btn btn-ghost btn-sm btn-circle">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+            </svg>
+          </button>
+        </div>
+        
+        <!-- 拖拽上传区域 -->
+        <div 
+          @drop="handleDrop"
+          @dragover.prevent="isDragOver = true"
+          @dragleave="isDragOver = false"
+          @dragenter.prevent
+          :class="['border-2 border-dashed rounded-lg p-8 text-center transition-colors', 
+                   isDragOver ? 'border-primary bg-primary/10' : 'border-gray-300']"
+        >
+          <svg class="w-12 h-12 mx-auto mb-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
+          </svg>
+          <p class="text-lg font-medium mb-2">拖拽图片到此处</p>
+          <p class="text-sm text-gray-500 mb-4">或选择以下方式上传图片</p>
+        </div>
+        
+        <!-- 操作按钮 -->
+         <div class="grid grid-cols-2 gap-3 mt-4">
+           <!-- 粘贴图片 -->
+           <button @click="pasteImage" class="btn btn-outline flex flex-col items-center p-4 h-auto">
+             <svg class="w-6 h-6 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
+             </svg>
+             <span class="text-xs">粘贴图片</span>
+           </button>
+           
+           <!-- 选择文件 -->
+           <button @click="selectFile" class="btn btn-outline flex flex-col items-center p-4 h-auto">
+             <svg class="w-6 h-6 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-5L12 5H5a2 2 0 00-2 2z"></path>
+             </svg>
+             <span class="text-xs">选择文件</span>
+           </button>
+         </div>
+        
+        <!-- 隐藏的文件输入 -->
+         <input 
+           ref="fileInput"
+           type="file"
+           accept="image/*"
+           @change="handleFileUpload"
+           class="hidden"
+         />
+      </div>
+    </div>
 
     <!-- OCR结果弹窗 -->
     <div v-if="showOCRModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
@@ -471,19 +522,66 @@ watch(selectedLanguage, (newLang) => {
 // OCR相关响应式数据
 const fileInput = ref(null)
 const showOCRModal = ref(false)
+const showOCRUploadModal = ref(false)
 const isOCRProcessing = ref(false)
 const ocrResult = ref('')
 const ocrError = ref('')
+const isDragOver = ref(false)
 
 // OCR相关方法
 const openOCRUpload = () => {
+  showOCRUploadModal.value = true
+}
+
+const closeOCRUploadModal = () => {
+  showOCRUploadModal.value = false
+  isDragOver.value = false
+}
+
+// 处理拖拽上传
+const handleDrop = (event) => {
+  event.preventDefault()
+  isDragOver.value = false
+  
+  const files = event.dataTransfer.files
+  if (files.length > 0) {
+    const file = files[0]
+    if (file.type.startsWith('image/')) {
+      processImageFile(file)
+    } else {
+      alert('请拖拽图片文件')
+    }
+  }
+}
+
+// 粘贴图片
+const pasteImage = async () => {
+  try {
+    const clipboardItems = await navigator.clipboard.read()
+    for (const clipboardItem of clipboardItems) {
+      for (const type of clipboardItem.types) {
+        if (type.startsWith('image/')) {
+          const blob = await clipboardItem.getType(type)
+          const file = new File([blob], 'pasted-image.png', { type })
+          processImageFile(file)
+          return
+        }
+      }
+    }
+    alert('剪贴板中没有找到图片')
+  } catch (error) {
+    console.error('粘贴图片失败:', error)
+    alert('粘贴图片失败，请确保剪贴板中有图片内容')
+  }
+}
+
+// 选择文件
+const selectFile = () => {
   fileInput.value?.click()
 }
 
-const handleFileUpload = async (event) => {
-  const file = event.target.files[0]
-  if (!file) return
-  
+// 处理图片文件
+const processImageFile = (file) => {
   // 检查文件类型
   if (!file.type.startsWith('image/')) {
     alert('请选择图片文件')
@@ -496,11 +594,19 @@ const handleFileUpload = async (event) => {
     return
   }
   
+  // 关闭上传弹窗，显示结果弹窗
+  closeOCRUploadModal()
   showOCRModal.value = true
   isOCRProcessing.value = true
   ocrResult.value = ''
   ocrError.value = ''
   
+  // 调用OCR API
+  callOCRAPI(file)
+}
+
+// 调用OCR API
+const callOCRAPI = async (file) => {
   try {
     // 创建FormData
     const formData = new FormData()
@@ -524,9 +630,18 @@ const handleFileUpload = async (event) => {
     ocrError.value = 'OCR服务暂时不可用，请稍后重试'
   } finally {
     isOCRProcessing.value = false
-    // 清空文件输入
-    event.target.value = ''
   }
+}
+
+const handleFileUpload = async (event) => {
+  const file = event.target.files[0]
+  if (!file) return
+  
+  // 处理图片文件
+  processImageFile(file)
+  
+  // 清空文件输入
+  event.target.value = ''
 }
 
 const confirmOCRResult = () => {
