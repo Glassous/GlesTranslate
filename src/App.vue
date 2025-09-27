@@ -25,12 +25,32 @@
               <h2 class="card-title text-lg">源语言</h2>
               <div class="badge badge-primary">自动检测</div>
             </div>
-            <textarea 
-              v-model="sourceText"
-              class="textarea textarea-bordered w-full h-48 resize-none"
-              placeholder="请输入要翻译的文本..."
-              @input="handleInput"
-            ></textarea>
+            <div class="relative">
+              <textarea 
+                v-model="sourceText"
+                class="textarea textarea-bordered w-full h-48 resize-none"
+                placeholder="请输入要翻译的文本..."
+                @input="handleInput"
+              ></textarea>
+              <!-- OCR按钮 -->
+              <button 
+                @click="openOCRUpload"
+                class="absolute bottom-2 right-2 btn btn-sm btn-primary btn-circle"
+                title="OCR文字识别"
+              >
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                </svg>
+              </button>
+              <!-- 隐藏的文件输入 -->
+              <input 
+                ref="fileInput"
+                type="file"
+                accept="image/*"
+                @change="handleFileUpload"
+                class="hidden"
+              />
+            </div>
             <div class="text-sm text-gray-500 mt-2">
               {{ sourceText.length }} / 5000 字符
             </div>
@@ -180,6 +200,48 @@
     </div>
     </div>
 
+
+    <!-- OCR结果弹窗 -->
+    <div v-if="showOCRModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
+      <div class="bg-base-100 rounded-lg p-6 max-w-2xl w-full mx-4 max-h-[80vh] overflow-y-auto">
+        <div class="flex justify-between items-center mb-4">
+          <h3 class="text-xl font-bold">OCR识别结果</h3>
+          <button @click="closeOCRModal" class="btn btn-ghost btn-sm btn-circle">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+            </svg>
+          </button>
+        </div>
+        
+        <div v-if="isOCRProcessing" class="flex items-center justify-center py-8">
+          <span class="loading loading-spinner loading-lg"></span>
+          <span class="ml-2">正在识别图片中的文字...</span>
+        </div>
+        
+        <div v-else-if="ocrResult" class="space-y-4">
+          <div class="form-control">
+            <label class="label">
+              <span class="label-text">识别到的文字内容：</span>
+            </label>
+            <textarea 
+              v-model="ocrResult"
+              class="textarea textarea-bordered w-full h-48 resize-none"
+              readonly
+            ></textarea>
+          </div>
+          
+          <div class="flex justify-end space-x-2">
+            <button @click="closeOCRModal" class="btn btn-secondary">取消</button>
+            <button @click="confirmOCRResult" class="btn btn-primary">确认并填入</button>
+          </div>
+        </div>
+        
+        <div v-else-if="ocrError" class="text-center py-8">
+          <div class="text-error mb-4">{{ ocrError }}</div>
+          <button @click="closeOCRModal" class="btn btn-secondary">关闭</button>
+        </div>
+      </div>
+    </div>
 
   </div>
 </template>
@@ -404,4 +466,80 @@ onMounted(() => {
 watch(selectedLanguage, (newLang) => {
   saveToStorage('selectedLanguage', newLang)
 }, { deep: true })
+
+
+// OCR相关响应式数据
+const fileInput = ref(null)
+const showOCRModal = ref(false)
+const isOCRProcessing = ref(false)
+const ocrResult = ref('')
+const ocrError = ref('')
+
+// OCR相关方法
+const openOCRUpload = () => {
+  fileInput.value?.click()
+}
+
+const handleFileUpload = async (event) => {
+  const file = event.target.files[0]
+  if (!file) return
+  
+  // 检查文件类型
+  if (!file.type.startsWith('image/')) {
+    alert('请选择图片文件')
+    return
+  }
+  
+  // 检查文件大小 (限制为10MB)
+  if (file.size > 10 * 1024 * 1024) {
+    alert('图片文件大小不能超过10MB')
+    return
+  }
+  
+  showOCRModal.value = true
+  isOCRProcessing.value = true
+  ocrResult.value = ''
+  ocrError.value = ''
+  
+  try {
+    // 创建FormData
+    const formData = new FormData()
+    formData.append('file', file)
+    
+    // 调用OCR API
+    const response = await fetch('https://api.pearktrue.cn/api/ocr/', {
+      method: 'POST',
+      body: formData
+    })
+    
+    const result = await response.json()
+    
+    if (result.code === 200 && result.data && result.data.ParsedText) {
+      ocrResult.value = result.data.ParsedText
+    } else {
+      ocrError.value = result.msg || 'OCR识别失败，请重试'
+    }
+  } catch (error) {
+    console.error('OCR API调用失败:', error)
+    ocrError.value = 'OCR服务暂时不可用，请稍后重试'
+  } finally {
+    isOCRProcessing.value = false
+    // 清空文件输入
+    event.target.value = ''
+  }
+}
+
+const confirmOCRResult = () => {
+  if (ocrResult.value) {
+    sourceText.value = ocrResult.value
+    closeOCRModal()
+  }
+}
+
+const closeOCRModal = () => {
+  showOCRModal.value = false
+  isOCRProcessing.value = false
+  ocrResult.value = ''
+  ocrError.value = ''
+}
 </script>
