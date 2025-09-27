@@ -24,7 +24,6 @@ export default {
     require('daisyui'),
     require('@tailwindcss/forms'),
     require('@tailwindcss/typography'),
-    require('tailwindcss-filters'),
   ],
   daisyui: {
     styled: true,
