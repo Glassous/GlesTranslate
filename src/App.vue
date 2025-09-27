@@ -35,17 +35,29 @@
               <div class="text-sm text-gray-500">
                 {{ sourceText.length }} / 5000 字符
               </div>
-              <!-- OCR按钮 -->
-              <button 
-                @click="openOCRUpload"
-                class="btn btn-sm btn-primary"
-                title="OCR文字识别"
-              >
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-                </svg>
-              </button>
-
+              <!-- 识别按钮组 -->
+              <div class="flex items-center gap-2">
+                <!-- 音频识别按钮 -->
+                <button 
+                  @click="openAudioUpload"
+                  class="btn btn-sm btn-secondary"
+                  title="音频识别"
+                >
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"></path>
+                  </svg>
+                </button>
+                <!-- OCR按钮 -->
+                <button 
+                  @click="openOCRUpload"
+                  class="btn btn-sm btn-primary"
+                  title="OCR文字识别"
+                >
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                  </svg>
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -194,11 +206,11 @@
     </div>
 
 
-    <!-- OCR上传弹窗 -->
+    <!-- 上传弹窗 -->
     <div v-if="showOCRUploadModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
       <div class="bg-base-100 rounded-lg p-6 max-w-lg w-full mx-4">
         <div class="flex justify-between items-center mb-4">
-          <h3 class="text-xl font-bold">OCR文字识别</h3>
+          <h3 class="text-xl font-bold">{{ uploadType === 'audio' ? '音频识别' : 'OCR文字识别' }}</h3>
           <button @click="closeOCRUploadModal" class="btn btn-ghost btn-sm btn-circle">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
@@ -215,17 +227,20 @@
           :class="['border-2 border-dashed rounded-lg p-8 text-center transition-colors', 
                    isDragOver ? 'border-primary bg-primary/10' : 'border-gray-300']"
         >
-          <svg class="w-12 h-12 mx-auto mb-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg v-if="uploadType === 'image'" class="w-12 h-12 mx-auto mb-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
           </svg>
-          <p class="text-lg font-medium mb-2">拖拽图片到此处</p>
-          <p class="text-sm text-gray-500 mb-4">或选择以下方式上传图片</p>
+          <svg v-else class="w-12 h-12 mx-auto mb-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"></path>
+          </svg>
+          <p class="text-lg font-medium mb-2">拖拽{{ uploadType === 'audio' ? '音频文件' : '图片' }}到此处</p>
+          <p class="text-sm text-gray-500 mb-4">或选择以下方式上传{{ uploadType === 'audio' ? '音频' : '图片' }}</p>
         </div>
         
         <!-- 操作按钮 -->
          <div class="grid grid-cols-2 gap-3 mt-4">
-           <!-- 粘贴图片 -->
-           <button @click="pasteImage" class="btn btn-outline flex flex-col items-center p-4 h-auto">
+           <!-- 粘贴图片/音频 -->
+           <button v-if="uploadType === 'image'" @click="pasteImage" class="btn btn-outline flex flex-col items-center p-4 h-auto">
              <svg class="w-6 h-6 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
              </svg>
@@ -233,7 +248,7 @@
            </button>
            
            <!-- 选择文件 -->
-           <button @click="selectFile" class="btn btn-outline flex flex-col items-center p-4 h-auto">
+           <button @click="selectFile" :class="uploadType === 'audio' ? 'col-span-2' : ''" class="btn btn-outline flex flex-col items-center p-4 h-auto">
              <svg class="w-6 h-6 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-5L12 5H5a2 2 0 00-2 2z"></path>
              </svg>
@@ -245,18 +260,18 @@
          <input 
            ref="fileInput"
            type="file"
-           accept="image/*"
+           :accept="uploadType === 'audio' ? 'audio/*' : 'image/*'"
            @change="handleFileUpload"
            class="hidden"
          />
       </div>
     </div>
 
-    <!-- OCR结果弹窗 -->
+    <!-- 识别结果弹窗 -->
     <div v-if="showOCRModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
       <div class="bg-base-100 rounded-lg p-6 max-w-2xl w-full mx-4 max-h-[80vh] overflow-y-auto">
         <div class="flex justify-between items-center mb-4">
-          <h3 class="text-xl font-bold">OCR识别结果</h3>
+          <h3 class="text-xl font-bold">{{ uploadType === 'audio' ? '音频识别结果' : 'OCR识别结果' }}</h3>
           <button @click="closeOCRModal" class="btn btn-ghost btn-sm btn-circle">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
@@ -264,18 +279,18 @@
           </button>
         </div>
         
-        <div v-if="isOCRProcessing" class="flex items-center justify-center py-8">
+        <div v-if="isOCRProcessing || isAudioProcessing" class="flex items-center justify-center py-8">
           <span class="loading loading-spinner loading-lg"></span>
-          <span class="ml-2">正在识别图片中的文字...</span>
+          <span class="ml-2">{{ uploadType === 'audio' ? '正在识别音频中的文字...' : '正在识别图片中的文字...' }}</span>
         </div>
         
-        <div v-else-if="ocrResult" class="space-y-4">
+        <div v-else-if="ocrResult || audioResult" class="space-y-4">
           <div class="form-control">
             <label class="label">
               <span class="label-text">识别到的文字内容：</span>
             </label>
             <textarea 
-              v-model="ocrResult"
+              :value="uploadType === 'audio' ? audioResult : ocrResult"
               class="textarea textarea-bordered w-full h-48 resize-none"
               readonly
             ></textarea>
@@ -287,8 +302,8 @@
           </div>
         </div>
         
-        <div v-else-if="ocrError" class="text-center py-8">
-          <div class="text-error mb-4">{{ ocrError }}</div>
+        <div v-else-if="ocrError || audioError" class="text-center py-8">
+          <div class="text-error mb-4">{{ uploadType === 'audio' ? audioError : ocrError }}</div>
           <button @click="closeOCRModal" class="btn btn-secondary">关闭</button>
         </div>
       </div>
@@ -528,8 +543,21 @@ const ocrResult = ref('')
 const ocrError = ref('')
 const isDragOver = ref(false)
 
+// 音频识别相关
+const isAudioProcessing = ref(false)
+const audioResult = ref('')
+const audioError = ref('')
+const uploadType = ref('') // 'image' 或 'audio'
+
 // OCR相关方法
 const openOCRUpload = () => {
+  uploadType.value = 'image'
+  showOCRUploadModal.value = true
+}
+
+// 音频识别相关方法
+const openAudioUpload = () => {
+  uploadType.value = 'audio'
   showOCRUploadModal.value = true
 }
 
@@ -546,11 +574,7 @@ const handleDrop = (event) => {
   const files = event.dataTransfer.files
   if (files.length > 0) {
     const file = files[0]
-    if (file.type.startsWith('image/')) {
-      processImageFile(file)
-    } else {
-      alert('请拖拽图片文件')
-    }
+    processFile(file)
   }
 }
 
@@ -580,6 +604,15 @@ const selectFile = () => {
   fileInput.value?.click()
 }
 
+// 处理文件
+const processFile = (file) => {
+  if (uploadType.value === 'audio') {
+    processAudioFile(file)
+  } else {
+    processImageFile(file)
+  }
+}
+
 // 处理图片文件
 const processImageFile = (file) => {
   // 检查文件类型
@@ -603,6 +636,59 @@ const processImageFile = (file) => {
   
   // 调用OCR API
   callOCRAPI(file)
+}
+
+// 处理音频文件
+const processAudioFile = (file) => {
+  // 检查文件类型
+  if (!file.type.startsWith('audio/')) {
+    alert('请选择音频文件')
+    return
+  }
+  
+  // 检查文件大小 (限制为50MB)
+  if (file.size > 50 * 1024 * 1024) {
+    alert('音频文件大小不能超过50MB')
+    return
+  }
+  
+  // 关闭上传弹窗，显示结果弹窗
+  closeOCRUploadModal()
+  showOCRModal.value = true
+  isAudioProcessing.value = true
+  audioResult.value = ''
+  audioError.value = ''
+  
+  // 调用音频识别API
+  callAudioAPI(file)
+}
+
+// 调用音频识别API
+const callAudioAPI = async (file) => {
+  try {
+    // 创建FormData
+    const formData = new FormData()
+    formData.append('file', file)
+    
+    // 调用音频识别API
+    const response = await fetch('https://api.pearktrue.cn/api/audiocr/', {
+      method: 'POST',
+      body: formData
+    })
+    
+    const result = await response.json()
+    
+    if (result.code === 200 && result.data && result.data.content) {
+      audioResult.value = result.data.content
+    } else {
+      audioError.value = result.msg || '音频识别失败，请重试'
+    }
+  } catch (error) {
+    console.error('音频识别API调用失败:', error)
+    audioError.value = '音频识别服务暂时不可用，请稍后重试'
+  } finally {
+    isAudioProcessing.value = false
+  }
 }
 
 // 调用OCR API
@@ -637,16 +723,17 @@ const handleFileUpload = async (event) => {
   const file = event.target.files[0]
   if (!file) return
   
-  // 处理图片文件
-  processImageFile(file)
+  // 处理文件
+  processFile(file)
   
   // 清空文件输入
   event.target.value = ''
 }
 
 const confirmOCRResult = () => {
-  if (ocrResult.value) {
-    sourceText.value = ocrResult.value
+  const result = uploadType.value === 'audio' ? audioResult.value : ocrResult.value
+  if (result) {
+    sourceText.value = result
     closeOCRModal()
   }
 }
@@ -654,7 +741,10 @@ const confirmOCRResult = () => {
 const closeOCRModal = () => {
   showOCRModal.value = false
   isOCRProcessing.value = false
+  isAudioProcessing.value = false
   ocrResult.value = ''
   ocrError.value = ''
+  audioResult.value = ''
+  audioError.value = ''
 }
 </script>
