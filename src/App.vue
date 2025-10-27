@@ -1,18 +1,76 @@
 <template>
   <div class="min-h-screen p-6 backdrop-filter backdrop-blur-lg bg-opacity-30 bg-base-100 relative">
+    <div :class="historyExpanded ? 'md:ml-80' : ''" class="transition-all duration-300 ease-in-out">
     <!-- 标题 -->
     <div class="flex items-center mb-8">
       <button 
         @click="historyExpanded = !historyExpanded"
         class="btn btn-ghost btn-circle mr-4"
+        aria-label="切换侧边栏"
       >
-        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <svg v-if="historyExpanded" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+        </svg>
+        <svg v-else class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
         </svg>
       </button>
       <h1 class="text-5xl font-aladin font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
         GlesTranslate
       </h1>
+    </div>
+    
+    <!-- 数据备份恢复弹窗 -->
+    <div :class="['modal', showBackupModal ? 'modal-open' : '']">
+      <div class="modal-box">
+        <h3 class="font-bold text-lg mb-4">数据备份与恢复</h3>
+        <div class="space-y-4">
+          <!-- 导出数据 -->
+          <div class="card bg-base-200">
+            <div class="card-body">
+              <h4 class="card-title text-base">导出数据</h4>
+              <p class="text-sm text-gray-600">将所有数据导出为JSON文件</p>
+              <div class="card-actions justify-end">
+                <button @click="exportData" class="btn btn-primary btn-sm">
+                  <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                  </svg>
+                  导出
+                </button>
+              </div>
+            </div>
+          </div>
+          
+          <!-- 导入数据 -->
+          <div class="card bg-base-200">
+            <div class="card-body">
+              <h4 class="card-title text-base">导入数据</h4>
+              <p class="text-sm text-gray-600">从JSON文件恢复数据</p>
+              <div class="form-control">
+                <input 
+                  ref="backupFileInput"
+                  type="file" 
+                  accept=".json"
+                  @change="handleBackupFileUpload"
+                  class="file-input file-input-bordered file-input-sm w-full"
+                />
+              </div>
+              <div class="card-actions justify-end">
+                <button @click="selectBackupFile" class="btn btn-secondary btn-sm">
+                  <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10"></path>
+                  </svg>
+                  选择文件
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="modal-action">
+          <button class="btn btn-ghost" @click="closeBackupModal">关闭</button>
+        </div>
+      </div>
     </div>
 
     <!-- 翻译模块 -->
@@ -109,9 +167,6 @@
                 placeholder="翻译结果将显示在这里..."
                 readonly
               ></textarea>
-              <div v-if="isTranslating" class="absolute inset-0 flex items-center justify-center bg-base-100 bg-opacity-75">
-                <span class="loading loading-spinner loading-md"></span>
-              </div>
             </div>
             <div class="flex justify-between items-center mt-2">
               <div class="text-sm text-gray-500">
@@ -150,6 +205,7 @@
       </button>
     </div>
 
+    </div>
       <!-- 历史记录侧边栏 -->
     <div class="fixed top-0 left-0 h-full z-50 transition-all duration-300 ease-in-out"
          :class="historyExpanded ? 'translate-x-0' : '-translate-x-full'">
@@ -193,14 +249,25 @@
             </div>
           </div>
         </div>
-        <div class="p-4 border-t border-base-300">
-          <button @click="historyExpanded = false" class="btn btn-primary w-full">关闭</button>
+        <div class="p-4 border-t border-base-300 space-y-2">
+          <button @click="openAIConfigModal" class="btn btn-outline w-full">
+            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-2.21 0-4 1.79-4 4s1.79 4 4 4m0-10V2m0 20v-4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4m12 0h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"></path>
+            </svg>
+            AI配置
+          </button>
+          <button @click="openBackupModal" class="btn btn-outline w-full">
+            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3-3m0 0l-3 3m3-3v12"></path>
+            </svg>
+            数据备份
+          </button>
         </div>
       </div>
     </div>
     <!-- 侧边栏遮罩 -->
     <div v-if="historyExpanded" 
-         class="fixed inset-0 bg-black bg-opacity-50 z-40"
+         class="fixed inset-0 bg-black bg-opacity-50 z-40 md:hidden"
          @click="historyExpanded = false">
     </div>
     </div>
@@ -279,7 +346,7 @@
           </button>
         </div>
         
-        <div v-if="isOCRProcessing || isAudioProcessing" class="flex items-center justify-center py-8">
+        <div v-if="shouldShowLoadingAnimation" class="flex items-center justify-center py-8">
           <span class="loading loading-spinner loading-lg"></span>
           <span class="ml-2">{{ uploadType === 'audio' ? '正在识别音频中的文字...' : '正在识别图片中的文字...' }}</span>
         </div>
@@ -309,11 +376,77 @@
       </div>
     </div>
 
+    <!-- AI配置模态框（daisyUI） -->
+    <div :class="['modal', showAIConfigModal ? 'modal-open' : '']">
+      <div class="modal-box max-w-xl">
+        <h3 class="font-bold text-lg">AI 配置</h3>
+        <div class="form-control mt-4">
+          <label class="label cursor-pointer">
+            <span class="label-text">启用自定义AI模型配置</span>
+            <input type="checkbox" v-model="aiConfigEnabledDraft" class="toggle toggle-primary" />
+          </label>
+        </div>
+
+        <div v-if="aiConfigEnabledDraft" class="space-y-3 mt-4">
+          <div class="form-control">
+            <label class="label"><span class="label-text">Base URL</span></label>
+            <input type="url" v-model.trim="aiConfigDraft.baseUrl" placeholder="https://api.example.com/v1" class="input input-bordered" />
+          </div>
+          <div class="form-control">
+            <label class="label"><span class="label-text">Model</span></label>
+            <input type="text" v-model.trim="aiConfigDraft.model" placeholder="模型名称" class="input input-bordered" />
+          </div>
+          <div class="form-control">
+            <label class="label"><span class="label-text">API Key</span></label>
+            <div class="relative">
+              <input 
+                :type="showApiKey ? 'text' : 'password'" 
+                v-model.trim="aiConfigDraft.apiKey" 
+                placeholder="密钥" 
+                class="input input-bordered pr-10" 
+              />
+              <button 
+                type="button"
+                @click="showApiKey = !showApiKey"
+                class="absolute right-2 top-1/2 transform -translate-y-1/2 btn btn-ghost btn-sm btn-square"
+              >
+                <svg v-if="showApiKey" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.878 9.878L3 3m6.878 6.878L21 21"></path>
+                </svg>
+                <svg v-else class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                </svg>
+              </button>
+            </div>
+          </div>
+          
+          <!-- 全模态模型配置 -->
+          <div class="divider">全模态模型配置</div>
+          <div class="form-control">
+            <label class="label cursor-pointer">
+              <span class="label-text">启用全模态模型（用于音频和图像识别）</span>
+              <input type="checkbox" v-model="multiModalEnabledDraft" class="toggle toggle-secondary" />
+            </label>
+          </div>
+          <div v-if="multiModalEnabledDraft" class="form-control">
+            <label class="label"><span class="label-text">全模态模型名称</span></label>
+            <input type="text" v-model.trim="aiConfigDraft.multiModalModel" placeholder="如：gpt-4-vision-preview" class="input input-bordered" />
+          </div>
+        </div>
+
+        <div class="modal-action">
+          <button class="btn btn-secondary" @click="closeAIConfigModal">取消</button>
+          <button class="btn btn-primary" @click="saveAIConfig">保存</button>
+        </div>
+      </div>
+    </div>
+
   </div>
 </template>
 
 <script setup>
-import { ref, reactive, onMounted, watch } from 'vue'
+import { ref, reactive, onMounted, watch, computed } from 'vue'
 
 // 从localStorage加载数据
 const loadFromStorage = (key, defaultValue) => {
@@ -400,11 +533,12 @@ const handleInput = () => {
   }
 }
 
-// 翻译函数
+// 翻译函数 - 支持AI配置和流式输出
 const translateText = async () => {
   if (!sourceText.value.trim() || isTranslating.value) return
   
   isTranslating.value = true
+  translatedText.value = '' // 清空之前的结果
   
   try {
     // 构建翻译提示词
@@ -415,7 +549,91 @@ const translateText = async () => {
 4. 只返回翻译结果，不要添加任何解释或说明
 5. 如果原文已经是目标语言，请直接返回原文`
     
-    // 调用API
+    // 检查是否启用自定义AI配置
+    if (aiConfigEnabled.value && aiConfig.baseUrl && aiConfig.model && aiConfig.apiKey) {
+      // 使用自定义AI配置进行翻译
+      await translateWithCustomAI(systemPrompt)
+    } else {
+      // 使用默认API进行翻译
+      await translateWithDefaultAPI(systemPrompt)
+    }
+  } catch (error) {
+    console.error('翻译错误:', error)
+    translatedText.value = '翻译服务暂时不可用，请稍后重试'
+  } finally {
+    isTranslating.value = false
+  }
+}
+
+// 使用自定义AI配置进行翻译（支持流式输出）
+const translateWithCustomAI = async (systemPrompt) => {
+  try {
+    const requestBody = {
+      model: aiConfig.model,
+      messages: [
+        { role: "system", content: systemPrompt },
+        { role: "user", content: sourceText.value }
+      ],
+      stream: true
+    }
+    
+    const response = await fetch(aiConfig.baseUrl + '/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${aiConfig.apiKey}`
+      },
+      body: JSON.stringify(requestBody)
+    })
+    
+    if (!response.ok) {
+      throw new Error(`API请求失败: ${response.status} ${response.statusText}`)
+    }
+    
+    const reader = response.body.getReader()
+    const decoder = new TextDecoder()
+    let buffer = ''
+    
+    while (true) {
+      const { done, value } = await reader.read()
+      if (done) break
+      
+      buffer += decoder.decode(value, { stream: true })
+      const lines = buffer.split('\n')
+      buffer = lines.pop() || '' // 保留不完整的行
+      
+      for (const line of lines) {
+        if (line.trim() === '') continue
+        if (line.startsWith('data: ')) {
+          const data = line.slice(6)
+          if (data === '[DONE]') continue
+          
+          try {
+            const parsed = JSON.parse(data)
+            const content = parsed.choices?.[0]?.delta?.content
+            if (content) {
+              translatedText.value += content
+            }
+          } catch (e) {
+            console.warn('解析流式数据失败:', e)
+          }
+        }
+      }
+    }
+    
+    // 添加到历史记录
+    if (translatedText.value && translatedText.value !== '翻译失败，请重试') {
+      addToHistory(sourceText.value, translatedText.value, selectedLanguage.value.name)
+    }
+  } catch (error) {
+    console.error('自定义AI翻译失败:', error)
+    throw error
+  }
+}
+
+// 使用默认API进行翻译
+const translateWithDefaultAPI = async (systemPrompt) => {
+  try {
     const apiUrl = `https://api.jkyai.top/API/depsek3.1.php?question=${encodeURIComponent(sourceText.value)}&type=text&system=${encodeURIComponent(systemPrompt)}`
     
     const response = await fetch(apiUrl)
@@ -428,10 +646,8 @@ const translateText = async () => {
       addToHistory(sourceText.value, result, selectedLanguage.value.name)
     }
   } catch (error) {
-    console.error('翻译错误:', error)
-    translatedText.value = '翻译服务暂时不可用，请稍后重试'
-  } finally {
-    isTranslating.value = false
+    console.error('默认API翻译失败:', error)
+    throw error
   }
 }
 
@@ -533,6 +749,172 @@ watch(selectedLanguage, (newLang) => {
   saveToStorage('selectedLanguage', newLang)
 }, { deep: true })
 
+// AI配置相关
+const showAIConfigModal = ref(false)
+const aiConfigEnabled = ref(loadFromStorage('aiConfigEnabled', false))
+const aiConfig = reactive(loadFromStorage('aiConfig', { baseUrl: '', model: '', apiKey: '', multiModalModel: '' }))
+const aiConfigEnabledDraft = ref(false)
+const aiConfigDraft = reactive({ baseUrl: '', model: '', apiKey: '', multiModalModel: '' })
+const multiModalEnabled = ref(loadFromStorage('multiModalEnabled', false))
+const multiModalEnabledDraft = ref(false)
+const showApiKey = ref(false)
+
+// 计算属性：是否显示加载动画
+const shouldShowLoadingAnimation = computed(() => {
+  const isProcessing = isOCRProcessing.value || isAudioProcessing.value
+  if (!isProcessing) return false
+  
+  // 如果启用了全模态模型，不显示加载动画（支持流式输出）
+  if (multiModalEnabled.value && aiConfig.baseUrl && aiConfig.apiKey && aiConfig.multiModalModel) {
+    return false
+  }
+  
+  // 否则显示加载动画
+  return true
+})
+
+const openAIConfigModal = () => {
+  aiConfigEnabledDraft.value = !!aiConfigEnabled.value
+  aiConfigDraft.baseUrl = aiConfig.baseUrl || ''
+  aiConfigDraft.model = aiConfig.model || ''
+  aiConfigDraft.apiKey = aiConfig.apiKey || ''
+  aiConfigDraft.multiModalModel = aiConfig.multiModalModel || ''
+  multiModalEnabledDraft.value = !!multiModalEnabled.value
+  showAIConfigModal.value = true
+}
+
+// 数据备份恢复相关
+const showBackupModal = ref(false)
+const backupFileInput = ref(null)
+
+const openBackupModal = () => {
+  showBackupModal.value = true
+}
+
+const closeBackupModal = () => {
+  showBackupModal.value = false
+}
+
+const exportData = () => {
+  try {
+    // 收集所有需要备份的数据
+    const backupData = {
+      version: '1.0',
+      timestamp: new Date().toISOString(),
+      data: {
+        translationHistory: translationHistory.value,
+        customLanguages: customLanguages.value,
+        selectedLanguage: selectedLanguage.value,
+        aiConfigEnabled: aiConfigEnabled.value,
+        aiConfig: aiConfig,
+        multiModalEnabled: multiModalEnabled.value
+      }
+    }
+    
+    // 创建并下载JSON文件
+    const dataStr = JSON.stringify(backupData, null, 2)
+    const dataBlob = new Blob([dataStr], { type: 'application/json' })
+    const url = URL.createObjectURL(dataBlob)
+    
+    const link = document.createElement('a')
+    link.href = url
+    link.download = `glestranslate-backup-${new Date().toISOString().split('T')[0]}.json`
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+    URL.revokeObjectURL(url)
+    
+    alert('数据导出成功！')
+  } catch (error) {
+    console.error('导出数据失败:', error)
+    alert('导出数据失败，请重试')
+  }
+}
+
+const selectBackupFile = () => {
+  backupFileInput.value?.click()
+}
+
+const handleBackupFileUpload = async (event) => {
+  const file = event.target.files[0]
+  if (!file) return
+  
+  try {
+    const text = await file.text()
+    const backupData = JSON.parse(text)
+    
+    // 验证数据格式
+    if (!backupData.data) {
+      throw new Error('无效的备份文件格式')
+    }
+    
+    // 恢复数据
+    if (backupData.data.translationHistory) {
+      translationHistory.value = backupData.data.translationHistory
+      saveToStorage('translationHistory', translationHistory.value)
+    }
+    
+    if (backupData.data.customLanguages) {
+      customLanguages.value = backupData.data.customLanguages
+      saveToStorage('customLanguages', customLanguages.value)
+      // 重新构建语言列表
+      languages.splice(presetLanguages.length)
+      languages.push(...customLanguages.value)
+    }
+    
+    if (backupData.data.selectedLanguage) {
+      selectedLanguage.value = backupData.data.selectedLanguage
+      saveToStorage('selectedLanguage', selectedLanguage.value)
+    }
+    
+    if (backupData.data.aiConfigEnabled !== undefined) {
+      aiConfigEnabled.value = backupData.data.aiConfigEnabled
+      saveToStorage('aiConfigEnabled', aiConfigEnabled.value)
+    }
+    
+    if (backupData.data.aiConfig) {
+      Object.assign(aiConfig, backupData.data.aiConfig)
+      saveToStorage('aiConfig', aiConfig)
+    }
+    
+    if (backupData.data.multiModalEnabled !== undefined) {
+      multiModalEnabled.value = backupData.data.multiModalEnabled
+      saveToStorage('multiModalEnabled', multiModalEnabled.value)
+    }
+    
+    alert('数据恢复成功！')
+    closeBackupModal()
+  } catch (error) {
+    console.error('导入数据失败:', error)
+    alert('导入数据失败，请检查文件格式')
+  }
+  
+  // 清空文件输入
+  event.target.value = ''
+}
+
+const closeAIConfigModal = () => {
+  showAIConfigModal.value = false
+}
+
+const saveAIConfig = () => {
+  if (aiConfigEnabledDraft.value) {
+    aiConfig.baseUrl = aiConfigDraft.baseUrl
+    aiConfig.model = aiConfigDraft.model
+    aiConfig.apiKey = aiConfigDraft.apiKey
+    aiConfig.multiModalModel = aiConfigDraft.multiModalModel
+    aiConfigEnabled.value = true
+  } else {
+    aiConfigEnabled.value = false
+  }
+  
+  multiModalEnabled.value = multiModalEnabledDraft.value
+  
+  saveToStorage('aiConfigEnabled', aiConfigEnabled.value)
+  saveToStorage('aiConfig', aiConfig)
+  saveToStorage('multiModalEnabled', multiModalEnabled.value)
+  showAIConfigModal.value = false
+}
 
 // OCR相关响应式数据
 const fileInput = ref(null)
@@ -666,22 +1048,11 @@ const processAudioFile = (file) => {
 // 调用音频识别API
 const callAudioAPI = async (file) => {
   try {
-    // 创建FormData
-    const formData = new FormData()
-    formData.append('file', file)
-    
-    // 调用音频识别API
-    const response = await fetch('https://api.pearktrue.cn/api/audiocr/', {
-      method: 'POST',
-      body: formData
-    })
-    
-    const result = await response.json()
-    
-    if (result.code === 200 && result.data && result.data.content) {
-      audioResult.value = result.data.content
+    // 检查是否启用全模态模型
+    if (multiModalEnabled.value && aiConfig.baseUrl && aiConfig.apiKey && aiConfig.multiModalModel) {
+      await callAudioAPIWithCustomAI(file)
     } else {
-      audioError.value = result.msg || '音频识别失败，请重试'
+      await callAudioAPIWithDefault(file)
     }
   } catch (error) {
     console.error('音频识别API调用失败:', error)
@@ -691,31 +1062,221 @@ const callAudioAPI = async (file) => {
   }
 }
 
+// 使用自定义AI进行音频识别
+const callAudioAPIWithCustomAI = async (file) => {
+  // 将音频文件转换为base64
+  const base64Audio = await fileToBase64(file)
+  
+  const requestBody = {
+    model: aiConfig.multiModalModel,
+    messages: [
+      {
+        role: "user",
+        content: [
+          {
+            type: "text",
+            text: "请识别这个音频文件中的文字内容，直接返回识别结果，不要添加任何解释。"
+          },
+          {
+            type: "audio",
+            audio: {
+              data: base64Audio.split(',')[1], // 移除data:audio/...;base64,前缀
+              format: file.type.split('/')[1] || 'mp3'
+            }
+          }
+        ]
+      }
+    ],
+    max_tokens: 1000,
+    stream: true
+  }
+
+  const response = await fetch(`${aiConfig.baseUrl}/chat/completions`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${aiConfig.apiKey}`
+    },
+    body: JSON.stringify(requestBody)
+  })
+
+  if (!response.ok) {
+    throw new Error(`HTTP error! status: ${response.status}`)
+  }
+
+  const reader = response.body.getReader()
+  const decoder = new TextDecoder()
+  audioResult.value = ''
+
+  try {
+    while (true) {
+      const { done, value } = await reader.read()
+      if (done) break
+
+      const chunk = decoder.decode(value, { stream: true })
+      const lines = chunk.split('\n')
+
+      for (const line of lines) {
+        if (line.startsWith('data: ')) {
+          const data = line.slice(6).trim()
+          if (data === '[DONE]') return
+
+          try {
+            const parsed = JSON.parse(data)
+            if (parsed.choices && parsed.choices[0] && parsed.choices[0].delta && parsed.choices[0].delta.content) {
+              audioResult.value += parsed.choices[0].delta.content
+            }
+          } catch (e) {
+            // 忽略解析错误
+          }
+        }
+      }
+    }
+  } finally {
+    reader.releaseLock()
+  }
+}
+
+// 使用默认API进行音频识别
+const callAudioAPIWithDefault = async (file) => {
+  // 创建FormData
+  const formData = new FormData()
+  formData.append('file', file)
+  
+  // 调用音频识别API
+  const response = await fetch('https://api.pearktrue.cn/api/audiocr/', {
+    method: 'POST',
+    body: formData
+  })
+  
+  const result = await response.json()
+  
+  if (result.code === 200 && result.data && result.data.content) {
+    audioResult.value = result.data.content
+  } else {
+    audioError.value = result.msg || '音频识别失败，请重试'
+  }
+}
+
+// 文件转base64工具函数
+const fileToBase64 = (file) => {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader()
+    reader.readAsDataURL(file)
+    reader.onload = () => resolve(reader.result)
+    reader.onerror = error => reject(error)
+  })
+}
+
 // 调用OCR API
 const callOCRAPI = async (file) => {
   try {
-    // 创建FormData
-    const formData = new FormData()
-    formData.append('file', file)
-    
-    // 调用OCR API
-    const response = await fetch('https://api.pearktrue.cn/api/ocr/', {
-      method: 'POST',
-      body: formData
-    })
-    
-    const result = await response.json()
-    
-    if (result.code === 200 && result.data && result.data.ParsedText) {
-      ocrResult.value = result.data.ParsedText
+    // 检查是否启用全模态模型
+    if (multiModalEnabled.value && aiConfig.baseUrl && aiConfig.apiKey && aiConfig.multiModalModel) {
+      await callOCRAPIWithCustomAI(file)
     } else {
-      ocrError.value = result.msg || 'OCR识别失败，请重试'
+      await callOCRAPIWithDefault(file)
     }
   } catch (error) {
     console.error('OCR API调用失败:', error)
     ocrError.value = 'OCR服务暂时不可用，请稍后重试'
   } finally {
     isOCRProcessing.value = false
+  }
+}
+
+// 使用自定义AI进行OCR识别
+const callOCRAPIWithCustomAI = async (file) => {
+  // 将图像文件转换为base64
+  const base64Image = await fileToBase64(file)
+  
+  const requestBody = {
+    model: aiConfig.multiModalModel,
+    messages: [
+      {
+        role: "user",
+        content: [
+          {
+            type: "text",
+            text: "请识别这张图片中的所有文字内容，直接返回识别结果，不要添加任何解释。"
+          },
+          {
+            type: "image_url",
+            image_url: {
+              url: base64Image
+            }
+          }
+        ]
+      }
+    ],
+    max_tokens: 1000,
+    stream: true
+  }
+
+  const response = await fetch(`${aiConfig.baseUrl}/chat/completions`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${aiConfig.apiKey}`
+    },
+    body: JSON.stringify(requestBody)
+  })
+
+  if (!response.ok) {
+    throw new Error(`HTTP error! status: ${response.status}`)
+  }
+
+  const reader = response.body.getReader()
+  const decoder = new TextDecoder()
+  ocrResult.value = ''
+
+  try {
+    while (true) {
+      const { done, value } = await reader.read()
+      if (done) break
+
+      const chunk = decoder.decode(value, { stream: true })
+      const lines = chunk.split('\n')
+
+      for (const line of lines) {
+        if (line.startsWith('data: ')) {
+          const data = line.slice(6).trim()
+          if (data === '[DONE]') return
+
+          try {
+            const parsed = JSON.parse(data)
+            if (parsed.choices && parsed.choices[0] && parsed.choices[0].delta && parsed.choices[0].delta.content) {
+              ocrResult.value += parsed.choices[0].delta.content
+            }
+          } catch (e) {
+            // 忽略解析错误
+          }
+        }
+      }
+    }
+  } finally {
+    reader.releaseLock()
+  }
+}
+
+// 使用默认API进行OCR识别
+const callOCRAPIWithDefault = async (file) => {
+  // 创建FormData
+  const formData = new FormData()
+  formData.append('file', file)
+  
+  // 调用OCR API
+  const response = await fetch('https://api.pearktrue.cn/api/ocr/', {
+    method: 'POST',
+    body: formData
+  })
+  
+  const result = await response.json()
+  
+  if (result.code === 200 && result.data && result.data.ParsedText) {
+    ocrResult.value = result.data.ParsedText
+  } else {
+    ocrError.value = result.msg || 'OCR识别失败，请重试'
   }
 }
 
