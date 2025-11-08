@@ -2,7 +2,8 @@
   <div class="min-h-screen p-6 backdrop-filter backdrop-blur-lg bg-opacity-30 bg-base-100 relative">
     <div :class="historyExpanded ? 'md:ml-80' : ''" class="transition-all duration-300 ease-in-out">
     <!-- 标题 -->
-    <div class="flex items-center mb-8">
+    <div class="flex items-center justify-between mb-8">
+      <div class="flex items-center">
       <button 
         @click="historyExpanded = !historyExpanded"
         class="btn btn-ghost btn-circle mr-4"
@@ -18,6 +19,53 @@
       <h1 class="text-5xl font-aladin font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
         GlesTranslate
       </h1>
+      </div>
+      <!-- 右侧图标区域 -->
+      <div class="flex items-center gap-3">
+        <!-- Android 图标 + 横幅 -->
+        <div class="relative">
+          <a 
+            href="https://github.com/Glassous/GlesTranslateAndroid" 
+            target="_blank" 
+            rel="noopener" 
+            class="btn btn-ghost btn-circle group"
+            aria-label="打开 Android 端仓库"
+            @mouseenter="showAndroidBanner = true"
+            @mouseleave="showAndroidBanner = false"
+          >
+            <!-- Android 品牌图标（Bootstrap Icons: bi-android） -->
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-[#3DDC84]" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
+              <path d="M2.76 3.061a.5.5 0 0 1 .679.2l1.283 2.352A8.9 8.9 0 0 1 8 5a8.9 8.9 0 0 1 3.278.613l1.283-2.352a.5.5 0 1 1 .878.478l-1.252 2.295C14.475 7.266 16 9.477 16 12H0c0-2.523 1.525-4.734 3.813-5.966L2.56 3.74a.5.5 0 0 1 .2-.678ZM5 10a1 1 0 1 0 0-2 1 1 0 0 0 0 2m6 0a1 1 0 1 0 0-2 1 1 0 0 0 0 2"/>
+            </svg>
+          </a>
+          <!-- Android 横幅 -->
+          <div class="absolute right-full top-1/2 -translate-y-1/2 mr-2 transition-all duration-300 ease-in-out">
+            <div 
+              :class="[showAndroidBanner ? 'opacity-100 scale-100 px-3 py-1' : 'opacity-0 scale-95 px-0 py-0 pointer-events-none']" 
+              class="badge badge-success whitespace-nowrap"
+            >
+              Android
+            </div>
+          </div>
+        </div>
+        <!-- GitHub 图标按钮 -->
+        <a 
+          href="https://github.com/Glassous/GlesTranslate" 
+          target="_blank" 
+          rel="noopener" 
+          class="btn btn-ghost btn-circle"
+          aria-label="打开 GitHub 仓库"
+        >
+          <svg class="w-6 h-6" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
+            <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 
+            0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 
+            1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 
+            0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 
+            1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 
+            0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/>
+          </svg>
+        </a>
+      </div>
     </div>
     
     <!-- 数据备份恢复弹窗 -->
@@ -476,6 +524,7 @@ const customLanguage = ref('')
 const historyExpanded = ref(false)
 const translationHistory = ref(loadFromStorage('translationHistory', []))
 const customLanguages = ref(loadFromStorage('customLanguages', []))
+const showAndroidBanner = ref(false)
 
 // 预设语言列表
 const presetLanguages = [
@@ -742,6 +791,12 @@ onMounted(() => {
       selectedLanguage.value = languages[1] // 默认选择英语
     }
   }
+
+  // 进入页面时展示“Android”横幅，2秒后收缩
+  showAndroidBanner.value = true
+  setTimeout(() => {
+    showAndroidBanner.value = false
+  }, 2000)
 })
 
 // 监听选中语言变化并保存
