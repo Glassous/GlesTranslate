@@ -22,32 +22,18 @@
       </div>
       <!-- 右侧图标区域 -->
       <div class="flex items-center gap-3">
-        <!-- Android 图标 + 横幅 -->
-        <div class="relative">
-          <a 
-            href="https://github.com/Glassous/GlesTranslateAndroid" 
-            target="_blank" 
-            rel="noopener" 
-            class="btn btn-ghost btn-circle group"
-            aria-label="打开 Android 端仓库"
-            @mouseenter="showAndroidBanner = true"
-            @mouseleave="showAndroidBanner = false"
-          >
-            <!-- Android 品牌图标（Bootstrap Icons: bi-android） -->
-            <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-[#3DDC84]" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
-              <path d="M2.76 3.061a.5.5 0 0 1 .679.2l1.283 2.352A8.9 8.9 0 0 1 8 5a8.9 8.9 0 0 1 3.278.613l1.283-2.352a.5.5 0 1 1 .878.478l-1.252 2.295C14.475 7.266 16 9.477 16 12H0c0-2.523 1.525-4.734 3.813-5.966L2.56 3.74a.5.5 0 0 1 .2-.678ZM5 10a1 1 0 1 0 0-2 1 1 0 0 0 0 2m6 0a1 1 0 1 0 0-2 1 1 0 0 0 0 2"/>
-            </svg>
-          </a>
-          <!-- Android 横幅 -->
-          <div class="absolute right-full top-1/2 -translate-y-1/2 mr-2 transition-all duration-300 ease-in-out">
-            <div 
-              :class="[showAndroidBanner ? 'opacity-100 scale-100 px-3 py-1' : 'opacity-0 scale-95 px-0 py-0 pointer-events-none']" 
-              class="badge badge-success whitespace-nowrap"
-            >
-              Android
-            </div>
-          </div>
-        </div>
+        <!-- Android 图标（横幅已移除） -->
+        <a 
+          href="https://github.com/Glassous/GlesTranslateAndroid" 
+          target="_blank" 
+          rel="noopener" 
+          class="btn btn-ghost btn-circle"
+          aria-label="打开 Android 端仓库"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-[#3DDC84]" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
+            <path d="M2.76 3.061a.5.5 0 0 1 .679.2l1.283 2.352A8.9 8.9 0 0 1 8 5a8.9 8.9 0 0 1 3.278.613l1.283-2.352a.5.5 0 1 1 .878.478l-1.252 2.295C14.475 7.266 16 9.477 16 12H0c0-2.523 1.525-4.734 3.813-5.966L2.56 3.74a.5.5 0 0 1 .2-.678ZM5 10a1 1 0 1 0 0-2 1 1 0 0 0 0 2m6 0a1 1 0 1 0 0-2 1 1 0 0 0 0 2"/>
+          </svg>
+        </a>
         <!-- GitHub 图标按钮 -->
         <a 
           href="https://github.com/Glassous/GlesTranslate" 
@@ -57,14 +43,29 @@
           aria-label="打开 GitHub 仓库"
         >
           <svg class="w-6 h-6" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
-            <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 
-            0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 
-            1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 
-            0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 
-            1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 
-            0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/>
+            <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/>
           </svg>
         </a>
+        <!-- 主题切换按钮：系统 -> 浅色 -> 深色 循环 -->
+        <button 
+          class="btn btn-ghost btn-circle"
+          :title="themeTitle"
+          aria-label="切换颜色主题"
+          @click="cycleTheme"
+        >
+          <!-- 系统跟随图标 -->
+          <svg v-if="themeMode === 'system'" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17h4.5M4 6h16v10a2 2 0 01-2 2H6a2 2 0 01-2-2V6z" />
+          </svg>
+          <!-- 浅色（太阳）图标 -->
+          <svg v-else-if="themeMode === 'light'" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v2m0 14v2m9-9h-2M5 12H3m15.364 6.364l-1.414-1.414M6.05 6.05L4.636 4.636m12.728 0l-1.414 1.414M6.05 17.95l-1.414 1.414M12 8a4 4 0 100 8 4 4 0 000-8z" />
+          </svg>
+          <!-- 深色（月亮）图标 -->
+          <svg v-else class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z" />
+          </svg>
+        </button>
       </div>
     </div>
     
@@ -494,7 +495,7 @@
 </template>
 
 <script setup>
-import { ref, reactive, onMounted, watch, computed } from 'vue'
+import { ref, reactive, onMounted, onUnmounted, watch, computed } from 'vue'
 
 // 从localStorage加载数据
 const loadFromStorage = (key, defaultValue) => {
@@ -524,7 +525,44 @@ const customLanguage = ref('')
 const historyExpanded = ref(false)
 const translationHistory = ref(loadFromStorage('translationHistory', []))
 const customLanguages = ref(loadFromStorage('customLanguages', []))
-const showAndroidBanner = ref(false)
+// 主题模式：system | light | dark（默认跟随系统）
+const themeMode = ref(loadFromStorage('themeMode', 'system'))
+let systemMediaQuery = null
+let systemListener = null
+
+const applyTheme = (mode) => {
+  if (typeof window === 'undefined') return
+  if (mode === 'system') {
+    systemMediaQuery = window.matchMedia('(prefers-color-scheme: dark)')
+    const setBySystem = () => {
+      document.documentElement.setAttribute('data-theme', systemMediaQuery.matches ? 'dark' : 'light')
+    }
+    setBySystem()
+    // 重置旧监听
+    if (systemListener) {
+      try { systemMediaQuery.removeEventListener('change', systemListener) } catch {}
+    }
+    systemListener = () => setBySystem()
+    try { systemMediaQuery.addEventListener('change', systemListener) } catch {}
+  } else {
+    document.documentElement.setAttribute('data-theme', mode === 'dark' ? 'dark' : 'light')
+    // 非系统模式移除监听
+    if (systemMediaQuery && systemListener) {
+      try { systemMediaQuery.removeEventListener('change', systemListener) } catch {}
+      systemListener = null
+    }
+  }
+}
+
+const cycleTheme = () => {
+  const order = ['system', 'light', 'dark']
+  const idx = order.indexOf(themeMode.value)
+  themeMode.value = order[(idx + 1) % order.length]
+}
+
+const themeTitle = computed(() => {
+  return themeMode.value === 'system' ? '跟随系统' : (themeMode.value === 'light' ? '浅色主题' : '深色主题')
+})
 
 // 预设语言列表
 const presetLanguages = [
@@ -791,18 +829,27 @@ onMounted(() => {
       selectedLanguage.value = languages[1] // 默认选择英语
     }
   }
-
-  // 进入页面时展示“Android”横幅，2秒后收缩
-  showAndroidBanner.value = true
-  setTimeout(() => {
-    showAndroidBanner.value = false
-  }, 2000)
+  // 应用主题（默认跟随系统）
+  applyTheme(themeMode.value)
 })
 
 // 监听选中语言变化并保存
 watch(selectedLanguage, (newLang) => {
   saveToStorage('selectedLanguage', newLang)
 }, { deep: true })
+
+// 监听主题模式变化并持久化
+watch(themeMode, (newMode) => {
+  saveToStorage('themeMode', newMode)
+  applyTheme(newMode)
+})
+
+onUnmounted(() => {
+  if (systemMediaQuery && systemListener) {
+    try { systemMediaQuery.removeEventListener('change', systemListener) } catch {}
+    systemListener = null
+  }
+})
 
 // AI配置相关
 const showAIConfigModal = ref(false)
