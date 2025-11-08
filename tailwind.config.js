@@ -21,9 +21,10 @@ export default {
     },
   },
   plugins: [
-    require('daisyui'),
+    // 先加载表单与排版，再加载 daisyUI，确保组件样式覆盖默认表单重置
     require('@tailwindcss/forms'),
     require('@tailwindcss/typography'),
+    require('daisyui'),
   ],
   daisyui: {
     styled: true,

@@ -77,7 +77,7 @@
           <div class="card bg-base-200">
             <div class="card-body">
               <h4 class="card-title text-base">导出数据</h4>
-              <p class="text-sm text-gray-600">将所有数据导出为JSON文件</p>
+              <p class="text-sm text-base-content/70">将所有数据导出为JSON文件</p>
               <div class="card-actions justify-end">
                 <button @click="exportData" class="btn btn-primary btn-sm">
                   <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -93,7 +93,7 @@
           <div class="card bg-base-200">
             <div class="card-body">
               <h4 class="card-title text-base">导入数据</h4>
-              <p class="text-sm text-gray-600">从JSON文件恢复数据</p>
+              <p class="text-sm text-base-content/70">从JSON文件恢复数据</p>
               <div class="form-control">
                 <input 
                   ref="backupFileInput"
@@ -133,12 +133,12 @@
             </div>
             <textarea 
               v-model="sourceText"
-              class="textarea textarea-bordered w-full h-48 resize-none"
+              class="textarea textarea-bordered w-full h-48 resize-none bg-base-200 text-base-content placeholder:text-base-content/50"
               placeholder="请输入要翻译的文本..."
               @input="handleInput"
             ></textarea>
             <div class="flex justify-between items-center mt-2">
-              <div class="text-sm text-gray-500">
+              <div class="text-sm text-base-content/60">
                 {{ sourceText.length }} / 5000 字符
               </div>
               <!-- 识别按钮组 -->
@@ -211,13 +211,13 @@
             <div class="relative">
               <textarea 
                 v-model="translatedText"
-                class="textarea textarea-bordered w-full h-48 resize-none"
+                class="textarea textarea-bordered w-full h-48 resize-none bg-base-200 text-base-content placeholder:text-base-content/50"
                 placeholder="翻译结果将显示在这里..."
                 readonly
               ></textarea>
             </div>
             <div class="flex justify-between items-center mt-2">
-              <div class="text-sm text-gray-500">
+              <div class="text-sm text-base-content/60">
                 {{ translatedText.length }} 字符
               </div>
               <button 
@@ -339,8 +339,8 @@
           @dragover.prevent="isDragOver = true"
           @dragleave="isDragOver = false"
           @dragenter.prevent
-          :class="['border-2 border-dashed rounded-lg p-8 text-center transition-colors', 
-                   isDragOver ? 'border-primary bg-primary/10' : 'border-gray-300']"
+                   :class="['border-2 border-dashed rounded-lg p-8 text-center transition-colors', 
+                   isDragOver ? 'border-primary bg-primary/10' : 'border-base-300']"
         >
           <svg v-if="uploadType === 'image'" class="w-12 h-12 mx-auto mb-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
@@ -349,7 +349,7 @@
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"></path>
           </svg>
           <p class="text-lg font-medium mb-2">拖拽{{ uploadType === 'audio' ? '音频文件' : '图片' }}到此处</p>
-          <p class="text-sm text-gray-500 mb-4">或选择以下方式上传{{ uploadType === 'audio' ? '音频' : '图片' }}</p>
+          <p class="text-sm text-base-content/60 mb-4">或选择以下方式上传{{ uploadType === 'audio' ? '音频' : '图片' }}</p>
         </div>
         
         <!-- 操作按钮 -->
@@ -406,7 +406,7 @@
             </label>
             <textarea 
               :value="uploadType === 'audio' ? audioResult : ocrResult"
-              class="textarea textarea-bordered w-full h-48 resize-none"
+              class="textarea textarea-bordered w-full h-48 resize-none bg-base-200 text-base-content placeholder:text-base-content/50"
               readonly
             ></textarea>
           </div>
